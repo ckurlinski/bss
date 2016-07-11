@@ -1,0 +1,318 @@
+#!/bin/bash
+
+#^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v#
+# Detect OS Functions
+#^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v#
+
+#--------------# Detect OS #--------------#
+os_type_fn() {
+#
+# Selects correct echo line to assign to "echo_type" variable,
+# Based on Operating System
+#
+	OS=(`uname`)
+	case $OS in
+		Darwin ) os_type=1 ;;
+		Linux ) os_type=2 ;;
+		FreeBSD ) os_type=3 ;;
+	esac
+}
+
+#--------------# Set echo pattern #--------------#
+echo_command_fn() {
+#
+# Sets script wide echo command based on OS
+#
+	case ${os_type} in
+		1) echo_type='echo' ;;
+		2) echo_type='echo -e' ;;
+		3) echo_type='echo' ;;
+	esac
+}
+
+#^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v#
+# Set Colors
+#^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v#
+
+#--------------# Color List #--------------#
+#
+# Sets up the colors to be used in script
+# Assigns human readble names
+#
+	ESC_SEQ="\x1b["
+	COL_RESET=$ESC_SEQ"39;49;00m"
+	COL_RED=$ESC_SEQ"31;01m"
+	COL_GREEN=$ESC_SEQ"32;01m"
+	COL_YELLOW=$ESC_SEQ"33;01m"
+	COL_BLUE=$ESC_SEQ"34;01m"
+	COL_MAGENTA=$ESC_SEQ"35;01m"
+	COL_CYAN=$ESC_SEQ"36;01m"
+
+#^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v#
+# Date Function
+#^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v#
+
+#--------------# Date Function #--------------#
+gdate_fn() {
+#
+# Format date and apply color
+#
+	#--------------# Date Format #--------------#
+		getDATE=$(date "+DATE: %Y-%m-%d")
+	#--------------# Main Date echo #--------------#
+		${echo_type} ${COL_YELLOW} ${getDATE} ${COL_RESET}
+}
+
+
+#^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v#
+# Text Formatting and Coloring Functions
+#^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v#
+
+#--------------# Note Color and Format Function #--------------#
+note_fn() {
+#
+# Sets up a script wide note format and color
+# Needs "_note" variable assigned
+#
+	${echo_type} ${COL_YELLOW} \
+	${_note}\
+	${COL_RESET}
+}
+
+#--------------# Question Function Format and Color #--------------#
+ques_fn() {
+#
+# Sets up a script wide question format and color
+# Needs "_ques" variable assigned
+# Uses "printf" to keep input on same line
+#
+	${echo_type} "${COL_GREEN}${_ques}${COL_RESET}"
+}
+
+#--------------# Warning Color and Format Function #--------------#
+warn_fn() {
+#
+# Sets up a script wide warning format and color
+# Needs "_warn" variable assigned
+#
+	${echo_type} ${COL_MAGENTA} \
+	${_warn}\
+	${COL_RESET}
+}
+
+#--------------# Separator Function #--------------#
+sep_fn() {
+#
+# Create a global standard separator with color
+#
+	${echo_type} ${COL_CYAN} \
+		"------------------------------------------"\
+	${COL_RESET}
+}
+
+#--------------# Header Function #--------------#
+header_fn() {
+#
+# Function to assemble header for navigation
+# Needs "_heading" variable assigned
+#
+	#--------------# Insert Seperator #--------------#
+#		sep_fn
+	#--------------# Main Header #--------------#
+	${echo_type} ${COL_RED}\
+		"#--------------# "\
+		${_heading}\
+		" #--------------#"\
+	${COL_RESET}
+	#--------------# Insert Seperator #--------------#
+}
+
+#^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v#
+# List, Case, and Misc Functions
+#^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v#
+
+#--------------# Base List #--------------#
+list_template() {
+#
+# Script wide listing function
+# Needs "_l0" array or other assigned for this to work
+# Sets selection value to "_list_output"
+	a=
+	count=1
+	for c0 in "${_l0[@]}"
+	do
+		a0[$count]=$c0
+		echo "$count ${a0[$count]}"
+		((count++))
+	done
+	read c1
+		_list_output=${a0[$c1]}
+}
+
+#--------------# Case YN #--------------#
+case_template_fn() {
+#
+# Script wide yes no function
+# Needs "_ans" value assign before calling function
+# Needs _ANS1, _ANS2, _ANS0 assigned to execute answered response
+#
+	case $_ans in
+		y|Y)	${_ANS1}		return 1	;;
+		n|N)	${_ANS2}		return 1	;;
+		*)				return 1	;;
+	esac
+}
+
+#--------------# For Loop #--------------#
+for_template_fn() {
+#
+# Script wide for loop function to run through series of commands or functions
+# Needs "_fl0" array to assigned to do functions
+#
+	for x in ${_fl0[*]}; do
+		_ques="Run ${x} (y|N)?"
+		ques_fn
+		read _ans1
+		case ${_ans1} in
+			y|Y) _warn="Running: $x ....."
+				sep_fn
+				warn_fn
+				${x}
+				;;
+			*)   _note="Skipping"
+				sep_fn
+				note_fn
+				;;
+		esac
+	done
+}
+
+#^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v#
+# Banners and script notes functions
+#^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v#
+
+#--------------# Script About Message #--------------#
+msg_base() {
+#
+# Base Message to explain purpose of script
+#
+sep_fn
+cat << EOF
+${_mgs_text}
+EOF
+}
+
+#--------------# Globar Banner #--------------#
+banner_fn() {
+#--------------# Set Banner Color #--------------#
+${echo_type} ${COL_CYAN}
+cat <<EOF
+LXC Scripting
+Created by Chris Kurlinski
+EOF
+${echo_type} ${COL_RESET}
+}
+
+#^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v#
+# Menu Functions
+#^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v#
+
+# The (3) functions
+#	(1) - g_menu_fn
+#	(2) - menu_list
+#	(3) - menu_command_run
+# Are used to create dynamic menus,
+# receiving input from a text array
+#	'_l0' - Defined by the calling function
+# and executing them from a command array
+#	'_opt0' - Defined by the calling function
+#
+# Arrays are tracked by name and number, making it easy
+#  to reference them in the script and functions.
+#	'_opt_output' is the name of the selection
+#	'_opt_count1 is the array number +1, since arrays start at '0'
+#
+# The '_g_info_list' variable is used to insert any extra,
+#  non-gerneric information into the dynamic menu.
+# It can be used to call a custom function:
+#	_g_info_list=what_ever_fn
+#
+
+#--------------# Execute Selected Generic Menu Command #--------------#
+menu_command_run() {
+# Called 3rd
+#
+# Takes value from menu_list_template function and then executes the
+# command from the supplied array "_opt0"
+#
+	#--------------# Command to run from menu command array #--------------#
+		${_opt0[$_opt_count]}
+}
+
+#--------------# Select Generic Menu Command #--------------#
+menu_list() {
+# Called 2nd
+#
+# Creates a menu from input array "_l0"
+# Checks selection value to see if it's a number [0-9]
+# Returns value "_opt_count" as a number for use to case execution value
+# Returns value "_opt_output" as the option name to be included in tmpfile
+#
+	a=
+	count=1
+	for c0 in "${_l0[@]}"
+	do
+		a0[$count]=$c0
+		${echo_type} "${COL_GREEN} $count ${COL_RESET}${a0[$count]}"
+		((count++))
+	done
+	read c1
+	#--------------# Selection Case Test #--------------#
+	if [[ $c1 != [0-9] ]]; then
+		case_abort_fn
+		return
+	else
+		_menu_count=${c1}
+		_opt_output=${a0[$c1]}
+		_opt_count=( `expr ${_menu_count} - 1` )
+	fi
+
+}
+
+#--------------# Generic Base Menu Function #--------------#
+g_menu_fn() {
+# Called 1st
+#
+# Description #
+# Creates memu from assign array "_l0", running the menu_list function
+# Executes commands from assigned array "_opt0", running the menu_command_run function
+# Runs value assigned to "_g_info_list"
+#
+	while :
+		do
+		#--------------# Header Function #--------------#
+			header_fn
+		#--------------# Tracked Information #--------------#
+			${_g_info_list}
+		#--------------# Generate menu list from menu options array #--------------#
+			menu_list
+		#--------------# Run choosen command from menu command array #--------------#
+			menu_command_run
+	done
+}
+
+#--------------# Main Menu Return Function #--------------#
+main_menu_return() {
+#
+#
+# Description #
+# Pauses script till user continues, unsets variable "_l0", and returns to the main_menu
+#
+	_note="Press the Any Key to continue...."
+	note_fn
+	read huh
+	unset _l0
+	main_menu
+}
+
+# End of Base Script
